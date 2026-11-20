@@ -4,7 +4,7 @@ App interna del mostrador de Servielectronica, un taller chico de notebooks, PC,
 tablets. Registra cada equipo que entra (por su número de serie o IMEI), sigue su orden de trabajo
 hasta la entrega y usa el historial del equipo para decidir la garantía.
 
-**App publicada:** https://USUARIO.github.io/ordenes-taller-servielectronica/
+**App publicada:** https://marialopezmkt.github.io/ordenes-taller-servielectronica/
 **Clave del panel:** `mostrador2026`
 
 ## Cómo arrancarlo en tu computadora
