@@ -32,7 +32,10 @@ export function Mesa() {
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl font-bold">Mesa</h1>
+        <div>
+          <h1 className="text-2xl font-bold">Mesa</h1>
+          <p className="text-sm text-gris">Órdenes en el taller</p>
+        </div>
         <Link to="/equipos/nuevo" className={estilos.boton}>
           Registrar equipo
         </Link>
