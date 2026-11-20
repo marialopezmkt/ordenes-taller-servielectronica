@@ -31,4 +31,7 @@ export const estilos = {
   etiqueta: "block text-sm font-semibold text-grafito",
   panel: "rounded-lg border border-grafito/15 bg-blanco p-4",
   enlace: "font-semibold text-grafito underline decoration-celeste decoration-2 underline-offset-4",
+  /** Enlace que va solo (no dentro de una frase): 44 px de alto para tocarlo con el dedo. */
+  enlaceSuelto:
+    "inline-flex min-h-11 items-center font-semibold text-grafito underline decoration-celeste decoration-2 underline-offset-4",
 };

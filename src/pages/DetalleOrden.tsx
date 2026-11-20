@@ -25,7 +25,7 @@ export function DetalleOrden() {
     return (
       <>
         <Mensaje tipo="error" texto={`No existe la orden ${id ?? ""}.`} />
-        <Link to="/" className={`${estilos.enlace} mt-3 inline-block`}>
+        <Link to="/" className={`${estilos.enlaceSuelto} mt-3`}>
           Volver a la mesa
         </Link>
       </>
@@ -64,7 +64,7 @@ export function DetalleOrden() {
           {orden.enGarantia && <Etiqueta tono="verde" texto="En garantía" />}
         </div>
         <p className="mt-3">
-          <Link to={`/equipos/${equipo.id}`} className={estilos.enlace}>
+          <Link to={`/equipos/${equipo.id}`} className={estilos.enlaceSuelto}>
             {TIPOS_EQUIPO.find((t) => t.id === equipo.tipo)?.nombre} {equipo.marca} {equipo.modelo}
           </Link>{" "}
           <span className="text-sm text-gris">· Serie {equipo.serie}</span>

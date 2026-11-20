@@ -98,7 +98,7 @@ export function AltaEquipo() {
             <div className="grid gap-1">
               <Mensaje tipo="error" texto={error.texto} />
               {error.equipoId && (
-                <Link to={`/equipos/${error.equipoId}`} className={estilos.enlace}>
+                <Link to={`/equipos/${error.equipoId}`} className={`${estilos.enlaceSuelto} justify-self-start`}>
                   Ver la ficha {error.equipoId}
                 </Link>
               )}

@@ -22,7 +22,7 @@ export function FichaEquipo() {
     return (
       <>
         <Mensaje tipo="error" texto={`No existe el equipo ${id ?? ""}.`} />
-        <Link to="/" className={`${estilos.enlace} mt-3 inline-block`}>
+        <Link to="/" className={`${estilos.enlaceSuelto} mt-3`}>
           Volver a la mesa
         </Link>
       </>
@@ -123,7 +123,7 @@ export function FichaEquipo() {
           <ul className="mt-2 divide-y divide-grafito/15">
             {ordenes.map((o) => (
               <li key={o.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
-                <Link to={`/ordenes/${o.id}`} className={`${estilos.enlace} font-titulo text-lg`}>
+                <Link to={`/ordenes/${o.id}`} className={`${estilos.enlaceSuelto} font-titulo text-lg`}>
                   {o.id}
                 </Link>
                 <span className="text-sm text-gris">Ingresó el {formatoFecha(o.ingresadaEn)}</span>
