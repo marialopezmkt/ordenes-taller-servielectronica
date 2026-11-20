@@ -19,12 +19,13 @@ export function Marco() {
   return (
     <div className="min-h-svh">
       <header className="bg-grafito text-blanco">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2">
-          <Link to="/" className="font-titulo text-lg font-bold leading-tight text-blanco">
+        {/* En celular: logo centrado y el menú debajo, también centrado. En escritorio: una sola fila. */}
+        <div className="mx-auto flex max-w-5xl flex-col items-center gap-1 px-4 py-2 sm:flex-row sm:gap-x-4">
+          <Link to="/" className="text-center font-titulo text-lg font-bold leading-tight text-blanco sm:text-left">
             Servielectronica
             <span className="block text-xs font-normal text-blanco/70">Órdenes de trabajo</span>
           </Link>
-          <nav className="ml-auto flex flex-wrap gap-1" aria-label="Principal">
+          <nav className="flex flex-wrap justify-center gap-1 sm:ml-auto" aria-label="Principal">
             <NavLink to="/" end className={nav}>
               Mesa
             </NavLink>

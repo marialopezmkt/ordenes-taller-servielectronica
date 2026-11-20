@@ -34,7 +34,7 @@ export function Mesa() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold">Mesa</h1>
-          <p className="text-sm text-gris">Órdenes en el taller</p>
+          <p className="text-sm text-gris">Órdenes de trabajo</p>
         </div>
         <Link to="/equipos/nuevo" className={estilos.boton}>
           Registrar equipo
