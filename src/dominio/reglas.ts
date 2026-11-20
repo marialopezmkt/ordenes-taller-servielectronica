@@ -83,6 +83,27 @@ export function garantiaVigente(
   return mejor;
 }
 
+/**
+ * Entrega de los últimos 90 días que NO da garantía porque no hubo reparación
+ * (por ejemplo, presupuesto rechazado). Sirve para explicarlo en pantalla.
+ */
+export function entregaSinReparacion(
+  ordenes: Orden[],
+  equipoId: string,
+  hoy: Fecha,
+): { orden: Orden; entregadoEn: Fecha } | undefined {
+  let ultima: { orden: Orden; entregadoEn: Fecha } | undefined;
+  for (const orden of ordenes) {
+    if (orden.equipoId !== equipoId || orden.estado !== "entregado" || orden.reparacionRealizada) continue;
+    const entregadoEn = fechaDeEstado(orden, "entregado");
+    if (!entregadoEn) continue;
+    const dias = diasEntre(entregadoEn, hoy);
+    if (dias < 0 || dias > DIAS_GARANTIA) continue;
+    if (!ultima || entregadoEn > ultima.entregadoEn) ultima = { orden, entregadoEn };
+  }
+  return ultima;
+}
+
 export type LineaDesglose = { concepto: string; monto: number };
 export type Desglose = { lineas: LineaDesglose[]; total: number };
 

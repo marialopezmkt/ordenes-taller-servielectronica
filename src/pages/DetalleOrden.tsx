@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useDatos } from "@/datos/contexto";
 import { aplicarAccion } from "@/dominio/acciones";
 import { TIPOS_EQUIPO, nombreEstado, type Accion } from "@/dominio/modelo";
@@ -8,13 +8,14 @@ import { EstadoChip, Etiqueta } from "@/ui/EstadoChip";
 import { FormDiagnostico } from "@/ui/FormDiagnostico";
 import { estilos, formatoFecha, formatoPesos, haceDias } from "@/ui/formato";
 import { Mensaje } from "@/ui/Marco";
+import { useExitoAlLlegar } from "@/ui/useExitoAlLlegar";
 
 const PRESUPUESTO = { pendiente: "Pendiente", aprobado: "Aprobado", rechazado: "Rechazado" };
 
 export function DetalleOrden() {
   const { id } = useParams();
   const { datos, hoy, ejecutar } = useDatos();
-  const inicial = (useLocation().state as { exito?: string } | null)?.exito;
+  const inicial = useExitoAlLlegar();
   const [mensaje, setMensaje] = useState<{ tipo: "error" | "exito"; texto: string } | null>(
     inicial ? { tipo: "exito", texto: inicial } : null,
   );
@@ -113,7 +114,7 @@ export function DetalleOrden() {
           <span className="font-semibold">Falla:</span> {orden.falla}
         </p>
         {orden.estado === "en_diagnostico" ? (
-          <FormDiagnostico orden={orden} equipo={equipo} />
+          <FormDiagnostico orden={orden} equipo={equipo} alGuardar={() => setMensaje(null)} />
         ) : (
           <p className="mt-1">
             <span className="font-semibold">Diagnóstico:</span> {orden.diagnostico || "Sin cargar todavía."}

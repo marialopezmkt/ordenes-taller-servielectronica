@@ -152,6 +152,8 @@ export type Orden = {
   diagnostico: string;
   servicios: LineaServicio[];
   repuestos: LineaRepuesto[];
+  /** Total en CLP. Se recalcula y se guarda con cada cambio de la orden. */
+  total: number;
   enGarantia: boolean;
   presupuesto: Presupuesto;
   /** Solo true si la orden pasó por En reparación y terminó reparada. */

@@ -99,8 +99,9 @@ las guías de abajo nombran el equipo, no el código.
 
 ## Cómo comprobar los criterios de aceptación
 
-Partir de los datos recién cargados (ver «Cómo reiniciar los datos de ejemplo») y entrar con la
-clave `mostrador2026`. Todo se puede probar en un celular de 360 px o en escritorio.
+Partir de los datos recién cargados y entrar con la clave `mostrador2026`. Lo más simple es abrir la
+app en una ventana de incógnito (Ctrl + Shift + N en Chrome), que siempre arranca con los datos de
+ejemplo; también se pueden reiniciar (ver «Cómo reiniciar los datos de ejemplo»). Todo se puede probar en un celular de 360 px o en escritorio.
 
 1. **Serie o IMEI repetido.** Ir a **Nuevo equipo**, poner la serie `PF3K9QZL` (también vale
    `pf3k-9qzl`: se comparan sin espacios, guiones ni mayúsculas), marca, modelo y nombre, y tocar
@@ -118,9 +119,14 @@ clave `mostrador2026`. Todo se puede probar en un celular de 360 px o en escrito
 4. **Garantía.** Ir a la ficha del **Motorola Moto G32** (desde su orden, tocando el nombre del
    equipo). Dice «En garantía … quedan 30 días» y, sobre el formulario, «La orden nueva entra en
    garantía». Escribir una falla y tocar **Abrir orden**: la orden nueva muestra la etiqueta «En
-   garantía», «Diagnóstico (en garantía) CLP $0» y total CLP $0. Si en diagnóstico se le agrega un
-   repuesto, ese sí se cobra. Para comparar, la ficha del **Dell Inspiron 15** (entregado hace 120
+   garantía», «Diagnóstico (en garantía) CLP $0» y total CLP $0. Si después se pasa a diagnóstico y
+   se marca «Cambio de batería de celular» con un repuesto, el servicio figura «(en garantía) CLP $0»
+   y solo se cobra el repuesto. Para comparar, la ficha del **Dell Inspiron 15** (entregado hace 120
    días) dice «Sin garantía vigente».
+   - **Entrega sin reparación:** si se rechaza el presupuesto de una orden y después se entrega el
+     equipo, no hubo trabajo reparado y por eso no hay garantía. La ficha lo explica en pantalla:
+     «Sin garantía: la última entrega (OT-…) fue sin reparación porque el cliente rechazó el
+     presupuesto». Ver «Decisiones tomadas» más abajo.
 5. **Retiro atrasado.** En la mesa, la orden de la **HP 14-dq2** aparece primera, con borde naranja,
    la etiqueta **Retiro atrasado** y «Lista para retirar desde hace 35 días». La del Lenovo, lista
    desde hace 1 día, no la tiene.

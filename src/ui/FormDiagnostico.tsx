@@ -8,7 +8,16 @@ import { Mensaje, NotaDemo } from "./Marco";
 type RepuestoBorrador = { descripcion: string; precio: string };
 
 /** Carga del diagnóstico y del presupuesto: solo con la orden En diagnóstico. */
-export function FormDiagnostico({ orden, equipo }: { orden: Orden; equipo: Equipo }) {
+export function FormDiagnostico({
+  orden,
+  equipo,
+  alGuardar,
+}: {
+  orden: Orden;
+  equipo: Equipo;
+  /** Avisa a la pantalla que se guardó, para que no queden dos mensajes de éxito. */
+  alGuardar: () => void;
+}) {
   const { ejecutar } = useDatos();
   const [diagnostico, setDiagnostico] = useState(orden.diagnostico);
   const [servicios, setServicios] = useState(orden.servicios.map((s) => s.servicioId));
@@ -39,6 +48,7 @@ export function FormDiagnostico({ orden, equipo }: { orden: Orden; equipo: Equip
           }),
         );
         setMensaje(r.ok ? { tipo: "exito", texto: "Diagnóstico guardado." } : { tipo: "error", texto: r.error });
+        if (r.ok) alGuardar();
       }}
     >
       <label className={estilos.etiqueta}>

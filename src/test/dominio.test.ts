@@ -106,12 +106,15 @@ describe("criterio 3: aprobación y rechazo", () => {
     const d = desglose(orden);
     expect(d.total).toBe(22000 + 5000);
     expect(d.lineas.some((l) => l.monto === -10000)).toBe(true);
+    expect(orden.total).toBe(d.total);
   });
 
   it("si rechaza, el total queda en el precio del diagnóstico", () => {
     const { datos, id } = ordenEsperandoAprobacion();
     const orden = ok(aplicarAccion(datos, id, "rechazar", HOY)).orden;
     expect(desglose(orden).total).toBe(10000);
+    // La orden guarda el total, no solo lo calcula al mostrarlo.
+    expect(orden.total).toBe(10000);
   });
 });
 

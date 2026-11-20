@@ -143,6 +143,19 @@ describe("criterio 4: garantía", () => {
   });
 });
 
+describe("garantía: una entrega sin reparación no la da y la ficha lo explica", () => {
+  it("rechazar y entregar el Galaxy A54 deja la ficha sin garantía, con el motivo a la vista", () => {
+    abrirOrdenDe(/Galaxy A54/);
+    fireEvent.click(screen.getByRole("button", { name: "Rechazó: a retiro" }));
+    fireEvent.click(screen.getByRole("button", { name: "Entregar" }));
+    fireEvent.click(screen.getByRole("link", { name: /Celular Samsung Galaxy A54/ }));
+    expect(screen.getByTestId("sin-garantia")).toHaveTextContent(
+      "fue sin reparación porque el cliente rechazó el presupuesto",
+    );
+    expect(screen.queryByText(/La orden nueva entra en garantía/)).not.toBeInTheDocument();
+  });
+});
+
 describe("criterio 8: los datos siguen al recargar", () => {
   it("un cambio guardado sigue ahí al volver a montar la app", () => {
     abrirOrdenDe(/Galaxy A54/);

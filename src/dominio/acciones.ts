@@ -14,7 +14,12 @@ import {
   type Orden,
   type Resultado,
 } from "./modelo";
-import { buscarEquipoPorSerie, garantiaVigente, ordenAbierta } from "./reglas";
+import { buscarEquipoPorSerie, desglose, garantiaVigente, ordenAbierta } from "./reglas";
+
+/** Toda orden se guarda con su total al día. */
+function conTotal(orden: Orden): Orden {
+  return { ...orden, total: desglose(orden).total };
+}
 
 export type NuevoEquipo = Omit<Equipo, "id" | "ingresadoEn">;
 
@@ -84,13 +89,14 @@ export function abrirOrden(
   const anio = hoy.slice(0, 4);
   const numero = (datos.correlativos.ordenesPorAnio[anio] ?? 0) + 1;
   const enGarantia = garantiaVigente(datos.ordenes, equipoId, hoy) !== undefined;
-  const orden: Orden = {
+  const orden: Orden = conTotal({
     id: codigoOrden(anio, numero),
     equipoId,
     falla: falla.trim(),
     diagnostico: "",
     servicios: [],
     repuestos: [],
+    total: 0,
     enGarantia,
     presupuesto: "pendiente",
     reparacionRealizada: false,
@@ -100,7 +106,7 @@ export function abrirOrden(
     historial: [
       { fecha: hoy, estado: "ingresado", nota: enGarantia ? "Ingresó en garantía" : "Ingresó al taller" },
     ],
-  };
+  });
   return {
     ok: true,
     valor: {
@@ -150,12 +156,12 @@ export function cargarDiagnostico(
       return { ok: false, error: "El precio del repuesto tiene que ser un número entero, sin decimales." };
     }
   }
-  const nueva: Orden = {
+  const nueva: Orden = conTotal({
     ...orden,
     diagnostico: carga.diagnostico.trim(),
     servicios,
     repuestos: carga.repuestos.map((r) => ({ descripcion: r.descripcion.trim(), precio: r.precio })),
-  };
+  });
   return { ok: true, valor: { orden: nueva, datos: reemplazarOrden(datos, nueva) } };
 }
 
@@ -206,5 +212,6 @@ export function aplicarAccion(
   }
   if (accionId === "sin_arreglo") nueva.reparacionRealizada = false;
 
-  return { ok: true, valor: { orden: nueva, datos: reemplazarOrden(datos, nueva) } };
+  const final = conTotal(nueva);
+  return { ok: true, valor: { orden: final, datos: reemplazarOrden(datos, final) } };
 }

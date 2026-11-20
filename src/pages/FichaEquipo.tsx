@@ -1,19 +1,20 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useDatos } from "@/datos/contexto";
 import { abrirOrden } from "@/dominio/acciones";
 import { sumarDias } from "@/dominio/fechas";
 import { DIAS_GARANTIA, TIPOS_EQUIPO } from "@/dominio/modelo";
-import { garantiaVigente, ordenAbierta } from "@/dominio/reglas";
+import { entregaSinReparacion, garantiaVigente, ordenAbierta } from "@/dominio/reglas";
 import { EstadoChip, Etiqueta } from "@/ui/EstadoChip";
 import { estilos, formatoFecha } from "@/ui/formato";
 import { Mensaje, NotaDemo } from "@/ui/Marco";
+import { useExitoAlLlegar } from "@/ui/useExitoAlLlegar";
 
 export function FichaEquipo() {
   const { id } = useParams();
   const { datos, hoy, ejecutar } = useDatos();
   const navigate = useNavigate();
-  const exito = (useLocation().state as { exito?: string } | null)?.exito;
+  const exito = useExitoAlLlegar();
   const [falla, setFalla] = useState("");
   const [error, setError] = useState("");
 
@@ -31,6 +32,7 @@ export function FichaEquipo() {
   const ordenes = datos.ordenes.filter((o) => o.equipoId === equipo.id).reverse();
   const abierta = ordenAbierta(datos.ordenes, equipo.id);
   const garantia = garantiaVigente(datos.ordenes, equipo.id, hoy);
+  const sinReparacion = garantia ? undefined : entregaSinReparacion(datos.ordenes, equipo.id, hoy);
 
   const casillas: [string, string][] = [
     ["Tipo", TIPOS_EQUIPO.find((t) => t.id === equipo.tipo)?.nombre ?? equipo.tipo],
@@ -63,6 +65,13 @@ export function FichaEquipo() {
               {garantia.orden.id}). Cubre hasta el {formatoFecha(sumarDias(garantia.entregadoEn, DIAS_GARANTIA))}:
               quedan {garantia.diasRestantes} días.
             </>
+          ) : sinReparacion ? (
+            <span data-testid="sin-garantia">
+              <span className="font-semibold">Sin garantía:</span> la última entrega ({sinReparacion.orden.id}, el{" "}
+              {formatoFecha(sinReparacion.entregadoEn)}) fue sin reparación
+              {sinReparacion.orden.presupuesto === "rechazado" ? " porque el cliente rechazó el presupuesto" : ""}. La
+              garantía cubre solo trabajos reparados.
+            </span>
           ) : (
             <span className="text-gris">Sin garantía vigente.</span>
           )}
