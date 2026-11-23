@@ -41,12 +41,12 @@ describe("criterio 7: filtros y contador", () => {
   it("los filtros se combinan y el contador coincide con la lista", () => {
     abrir("/");
     const contar = () => within(screen.getByRole("list", { name: "Órdenes" })).getAllByRole("listitem").length;
-    expect(screen.getByTestId("contador")).toHaveTextContent("10 órdenes");
-    expect(contar()).toBe(10);
+    expect(screen.getByTestId("contador")).toHaveTextContent("18 órdenes");
+    expect(contar()).toBe(18);
 
     fireEvent.change(screen.getByLabelText("Tipo de equipo"), { target: { value: "notebook" } });
     expect(screen.getByTestId("contador")).toHaveTextContent(`${contar()} órdenes`);
-    expect(contar()).toBe(4);
+    expect(contar()).toBe(6);
 
     fireEvent.change(screen.getByLabelText("Días desde el ingreso"), { target: { value: "mas30" } });
     expect(screen.getByTestId("contador")).toHaveTextContent("2 órdenes");

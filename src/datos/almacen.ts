@@ -2,8 +2,12 @@
 import type { DatosTaller, Fecha, Resultado } from "@/dominio/modelo";
 import { crearSemilla } from "./semilla";
 
-/** Clave propia de la app. Si no existe, se carga la semilla. */
-export const CLAVE_DATOS = "servielectronica-ot:datos";
+/**
+ * Clave propia de la app. Si no existe, se carga la semilla.
+ * Versión 2: suma el catálogo editable. Un navegador que guardó datos de la
+ * versión anterior arranca con la semilla nueva.
+ */
+export const CLAVE_DATOS = "servielectronica-ot:datos-v2";
 
 /** Lo mínimo de Storage que usa la app (en los tests se reemplaza). */
 export type Almacen = Pick<Storage, "getItem" | "setItem">;
@@ -13,7 +17,8 @@ function pareceDatos(x: unknown): x is DatosTaller {
   return (
     typeof d === "object" &&
     d !== null &&
-    d.version === 1 &&
+    d.version === 2 &&
+    Array.isArray(d.catalogo) &&
     Array.isArray(d.equipos) &&
     Array.isArray(d.ordenes) &&
     typeof d.correlativos?.equipo === "number"

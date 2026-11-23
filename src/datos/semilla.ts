@@ -3,7 +3,7 @@
 // así la garantía y el retiro atrasado se ven siempre en la demo.
 import { abrirOrden, aplicarAccion, cargarDiagnostico, crearEquipo, type NuevoEquipo } from "@/dominio/acciones";
 import { sumarDias } from "@/dominio/fechas";
-import type { DatosTaller, Fecha, IdAccion, LineaRepuesto, Resultado } from "@/dominio/modelo";
+import { datosVacios, type DatosTaller, type Fecha, type IdAccion, type LineaRepuesto, type Resultado } from "@/dominio/modelo";
 
 function ok<T>(r: Resultado<T>): T {
   if (!r.ok) throw new Error(`Semilla inválida: ${r.error}`);
@@ -70,6 +70,26 @@ const EQUIPOS: NuevoEquipo[] = [
     tipo: "celular", marca: "Xiaomi", modelo: "Redmi Note 12", serie: "864213059987412",
     accesorios: "Sin accesorios", estadoFisico: "Mojado, con marcas de humedad",
     contacto: { nombre: "Paula N.", telefono: "+56 9 5555 0110" },
+  },
+  {
+    tipo: "tablet", marca: "Lenovo", modelo: "Tab M10 HD", serie: "HGT4K2PQ",
+    accesorios: "Cargador", estadoFisico: "Esquina superior golpeada",
+    contacto: { nombre: "Sofía L.", telefono: "+56 9 5555 0111" },
+  },
+  {
+    tipo: "celular", marca: "Samsung", modelo: "Galaxy A14", serie: "352940118833076",
+    accesorios: "Funda con tapa", estadoFisico: "Buen estado general",
+    contacto: { nombre: "Benjamín O.", telefono: "+56 9 5555 0112" },
+  },
+  {
+    tipo: "pc", marca: "HP", modelo: "All-in-One 24-cb1", serie: "8CC2104XKZ",
+    accesorios: "Teclado y mouse inalámbricos", estadoFisico: "Pantalla sin rayones",
+    contacto: { nombre: "Carolina F.", telefono: "+56 9 5555 0113" },
+  },
+  {
+    tipo: "notebook", marca: "Acer", modelo: "Aspire 5 A515", serie: "NXA1ZAL0072310",
+    accesorios: "Cargador y funda", estadoFisico: "Bisagra derecha cortada, tapa abierta a 90°",
+    contacto: { nombre: "Diego M.", telefono: "+56 9 5555 0114" },
   },
 ];
 
@@ -150,15 +170,72 @@ const ORDENES: OrdenEjemplo[] = [
       { accion: "sin_arreglo", hace: 20 },
     ],
   },
+  // Volvió después del intento fallido: cambio de batería, listo para retirar.
+  {
+    equipo: "EQ-0010", falla: "Ya enciende, pero la batería se descarga en una hora", ingresoHace: 9,
+    diagnostico: { texto: "Batería dañada por la humedad.", servicios: ["bateria_celular"], repuestos: [{ descripcion: "Batería 5000 mAh", precio: 14000 }] },
+    pasos: [
+      { accion: "iniciar_diagnostico", hace: 8 }, { accion: "enviar_presupuesto", hace: 8 },
+      { accion: "aprobar", hace: 7 }, { accion: "terminar_reparacion", hace: 2 },
+    ],
+  },
+  // Entregado hace 120 días (sin garantía) y de vuelta en diagnóstico.
+  {
+    equipo: "EQ-0007", falla: "La bisagra izquierda cruje al abrir", ingresoHace: 2,
+    pasos: [{ accion: "iniciar_diagnostico", hace: 1 }],
+  },
+  // Tablet: un intento anterior sin arreglo posible y ahora en reparación.
+  {
+    equipo: "EQ-0011", falla: "No enciende después de una caída", ingresoHace: 160,
+    diagnostico: { texto: "Placa madre partida. Se intenta reparar el conector.", servicios: ["recuperacion"] },
+    pasos: [
+      { accion: "iniciar_diagnostico", hace: 159 }, { accion: "enviar_presupuesto", hace: 158 },
+      { accion: "aprobar", hace: 158 }, { accion: "terminar_reparacion", hace: 152 },
+      { accion: "sin_arreglo", hace: 150 },
+    ],
+  },
+  {
+    equipo: "EQ-0011", falla: "Pantalla trizada, el táctil falla en el borde", ingresoHace: 6,
+    diagnostico: { texto: "Digitalizador roto.", servicios: ["pantalla_celular"], repuestos: [{ descripcion: "Pantalla Tab M10 completa", precio: 39000 }] },
+    pasos: [
+      { accion: "iniciar_diagnostico", hace: 5 }, { accion: "enviar_presupuesto", hace: 5 },
+      { accion: "aprobar", hace: 4 },
+    ],
+  },
+  // Rechazó el presupuesto y lo retiró: esa entrega no da garantía. Volvió con otra falla.
+  {
+    equipo: "EQ-0012", falla: "La pantalla parpadea", ingresoHace: 30,
+    diagnostico: { texto: "Flex de pantalla dañado. Conviene cambiar la pantalla.", servicios: ["pantalla_celular"], repuestos: [{ descripcion: "Pantalla Galaxy A14", precio: 32000 }] },
+    pasos: [
+      { accion: "iniciar_diagnostico", hace: 29 }, { accion: "enviar_presupuesto", hace: 29 },
+      { accion: "rechazar", hace: 27 }, { accion: "entregar", hace: 25 },
+    ],
+  },
+  { equipo: "EQ-0012", falla: "No reconoce el chip", ingresoHace: 1, pasos: [] },
+  {
+    equipo: "EQ-0013", falla: "Tarda mucho en arrancar y se congela", ingresoHace: 4,
+    diagnostico: { texto: "Disco lento y sistema con errores. Conviene SSD y formateo.", servicios: ["ssd", "formateo"], repuestos: [{ descripcion: "SSD 512 GB", precio: 31000 }] },
+    pasos: [{ accion: "iniciar_diagnostico", hace: 3 }, { accion: "enviar_presupuesto", hace: 2 }],
+  },
+  {
+    equipo: "EQ-0014", falla: "La bisagra derecha se cortó", ingresoHace: 11,
+    diagnostico: { texto: "Bisagra derecha rota y anclaje de la tapa suelto.", servicios: ["bisagra"], repuestos: [{ descripcion: "Bisagra Aspire 5 (par)", precio: 16000 }] },
+    pasos: [
+      { accion: "iniciar_diagnostico", hace: 10 }, { accion: "enviar_presupuesto", hace: 10 },
+      { accion: "aprobar", hace: 9 }, { accion: "esperar_repuesto", hace: 9 },
+    ],
+  },
 ];
 
 export function crearSemilla(hoy: Fecha): DatosTaller {
-  let d: DatosTaller = { version: 1, equipos: [], ordenes: [], correlativos: { equipo: 0, ordenesPorAnio: {} } };
+  let d = datosVacios();
   // Las órdenes se abren en orden de fecha, así los códigos OT quedan cronológicos.
   const porFecha = [...ORDENES].sort((a, b) => b.ingresoHace - a.ingresoHace);
   for (const [i, e] of EQUIPOS.entries()) {
-    const primera = ORDENES.find((o) => o.equipo === `EQ-${String(i + 1).padStart(4, "0")}`);
-    d = ok(crearEquipo(d, e, sumarDias(hoy, -(primera?.ingresoHace ?? 0)))).datos;
+    // El equipo ingresó con su orden más antigua.
+    const id = `EQ-${String(i + 1).padStart(4, "0")}`;
+    const primerIngreso = Math.max(0, ...ORDENES.filter((o) => o.equipo === id).map((o) => o.ingresoHace));
+    d = ok(crearEquipo(d, e, sumarDias(hoy, -primerIngreso))).datos;
   }
   for (const o of porFecha) {
     const abierta = ok(abrirOrden(d, o.equipo, o.falla, sumarDias(hoy, -o.ingresoHace)));

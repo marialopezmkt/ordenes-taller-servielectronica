@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useDatos } from "@/datos/contexto";
 import { cargarDiagnostico } from "@/dominio/acciones";
-import { CATALOGO, ID_DIAGNOSTICO, type Equipo, type Orden } from "@/dominio/modelo";
+import { ID_DIAGNOSTICO, type Equipo, type Orden } from "@/dominio/modelo";
 import { estilos, formatoPesos } from "./formato";
 import { Mensaje, NotaDemo } from "./Marco";
 
@@ -18,14 +18,23 @@ export function FormDiagnostico({
   /** Avisa a la pantalla que se guardó, para que no queden dos mensajes de éxito. */
   alGuardar: () => void;
 }) {
-  const { ejecutar } = useDatos();
+  const { datos, ejecutar } = useDatos();
   const [diagnostico, setDiagnostico] = useState(orden.diagnostico);
   const [servicios, setServicios] = useState(orden.servicios.map((s) => s.servicioId));
   const [repuestos, setRepuestos] = useState<RepuestoBorrador[]>(
     orden.repuestos.map((r) => ({ descripcion: r.descripcion, precio: String(r.precio) })),
   );
   const [mensaje, setMensaje] = useState<{ tipo: "error" | "exito"; texto: string } | null>(null);
-  const aplicables = CATALOGO.filter((s) => s.id !== ID_DIAGNOSTICO && s.equipos.includes(equipo.tipo));
+  // Se ofrecen los servicios activos del tipo de equipo, más los que la orden ya tenía
+  // (esos conservan el precio con el que se cargaron).
+  const yaCargados = new Set(orden.servicios.map((s) => s.servicioId));
+  const aplicables = datos.catalogo
+    .filter((s) => s.id !== ID_DIAGNOSTICO && s.equipos.includes(equipo.tipo))
+    .filter((s) => !s.pausado || yaCargados.has(s.id))
+    .map((s) => {
+      const previo = orden.servicios.find((x) => x.servicioId === s.id);
+      return previo ? { ...s, precio: previo.precio } : s;
+    });
 
   function cambiarRepuesto(i: number, cambio: Partial<RepuestoBorrador>) {
     setRepuestos(repuestos.map((r, j) => (j === i ? { ...r, ...cambio } : r)));

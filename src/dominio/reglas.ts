@@ -4,7 +4,6 @@ import {
   DIAS_GARANTIA,
   DIAS_RETIRO_ATRASADO,
   ESTADOS_FINALES,
-  PRECIO_DIAGNOSTICO,
   TRANSICIONES,
   type Accion,
   type DatosTaller,
@@ -116,7 +115,7 @@ export type Desglose = { lineas: LineaDesglose[]; total: number };
  */
 export function desglose(orden: Orden): Desglose {
   const garantia = orden.enGarantia;
-  const diag = garantia ? 0 : PRECIO_DIAGNOSTICO;
+  const diag = garantia ? 0 : orden.precioDiagnostico;
   const lineas: LineaDesglose[] = [
     { concepto: garantia ? "Diagnóstico (en garantía)" : "Diagnóstico", monto: diag },
   ];

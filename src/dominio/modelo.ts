@@ -99,21 +99,31 @@ export const TRANSICIONES: Record<EstadoOrden, Accion[]> = {
   sin_reparacion: [],
 };
 
-/** Servicio del catálogo: precio de mano de obra en pesos chilenos. */
+/**
+ * Servicio del catálogo: precio de mano de obra en pesos chilenos.
+ * Nombre, tipos de equipo, precio y días son obligatorios.
+ */
 export type Servicio = {
   id: string;
   nombre: string;
   equipos: TipoEquipo[];
   precio: number;
   dias: number;
+  /** Pausado: no se ofrece al cargar diagnósticos nuevos. */
+  pausado: boolean;
 };
 
 export const ID_DIAGNOSTICO = "diagnostico";
 
-const TODOS: TipoEquipo[] = ["notebook", "pc", "celular", "tablet"];
+export const TODOS_LOS_TIPOS: TipoEquipo[] = ["notebook", "pc", "celular", "tablet"];
+const TODOS = TODOS_LOS_TIPOS;
 
-/** Catálogo de ejemplo del encargo (literal). */
-export const CATALOGO: Servicio[] = [
+/**
+ * Catálogo inicial (el de ejemplo del encargo). Es la semilla: desde la app se
+ * edita en la pantalla Catálogo y se guarda con los demás datos.
+ */
+export const CATALOGO_INICIAL: Servicio[] = ([
+
   { id: ID_DIAGNOSTICO, nombre: "Diagnóstico general", equipos: TODOS, precio: 10000, dias: 1 },
   { id: "formateo", nombre: "Formateo e instalación de sistema operativo", equipos: ["notebook", "pc"], precio: 25000, dias: 1 },
   { id: "limpieza", nombre: "Limpieza interna y cambio de pasta térmica", equipos: ["notebook", "pc"], precio: 22000, dias: 1 },
@@ -124,10 +134,13 @@ export const CATALOGO: Servicio[] = [
   { id: "pin_carga", nombre: "Cambio de pin de carga de celular", equipos: ["celular"], precio: 20000, dias: 2 },
   { id: "pantalla_celular", nombre: "Cambio de pantalla de celular o tablet", equipos: ["celular", "tablet"], precio: 25000, dias: 3 },
   { id: "recuperacion", nombre: "Recuperación de datos básica", equipos: TODOS, precio: 35000, dias: 3 },
-];
+] satisfies Omit<Servicio, "pausado">[]).map((s) => ({ ...s, pausado: false }));
 
-export const PRECIO_DIAGNOSTICO = 10000;
+// Parámetros de las reglas. Para cambiarlos, editá estos valores (ver README,
+// sección «Reglas y pruebas»).
+/** Días de garantía desde la entrega. */
 export const DIAS_GARANTIA = 90;
+/** Más de estos días en Lista para retirar muestra «Retiro atrasado». */
 export const DIAS_RETIRO_ATRASADO = 30;
 
 /** Servicio presupuestado en una orden (copia del precio al momento de cargarlo). */
@@ -152,6 +165,8 @@ export type Orden = {
   diagnostico: string;
   servicios: LineaServicio[];
   repuestos: LineaRepuesto[];
+  /** Precio del diagnóstico cuando se abrió la orden (no cambia si después se edita el catálogo). */
+  precioDiagnostico: number;
   /** Total en CLP. Se recalcula y se guarda con cada cambio de la orden. */
   total: number;
   enGarantia: boolean;
@@ -167,12 +182,24 @@ export type Orden = {
 
 /** Todo lo que guarda la app: un solo documento que se persiste completo. */
 export type DatosTaller = {
-  version: 1;
+  version: 2;
+  catalogo: Servicio[];
   equipos: Equipo[];
   ordenes: Orden[];
   /** Últimos números usados. Nunca bajan, así los códigos no se reutilizan. */
-  correlativos: { equipo: number; ordenesPorAnio: Record<string, number> };
+  correlativos: { equipo: number; servicio: number; ordenesPorAnio: Record<string, number> };
 };
+
+/** Datos vacíos con el catálogo inicial: punto de partida de la semilla y de los tests. */
+export function datosVacios(): DatosTaller {
+  return {
+    version: 2,
+    catalogo: CATALOGO_INICIAL.map((s) => ({ ...s, equipos: [...s.equipos] })),
+    equipos: [],
+    ordenes: [],
+    correlativos: { equipo: 0, servicio: 0, ordenesPorAnio: {} },
+  };
+}
 
 export type Resultado<T> =
   | { ok: true; valor: T }

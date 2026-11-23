@@ -1,6 +1,8 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { DatosProvider } from "@/datos/contexto";
 import { Acceso } from "@/pages/Acceso";
+import { Ajustes } from "@/pages/Ajustes";
+import { Catalogo } from "@/pages/Catalogo";
 import { AltaEquipo } from "@/pages/AltaEquipo";
 import { DetalleOrden } from "@/pages/DetalleOrden";
 import { FichaEquipo } from "@/pages/FichaEquipo";
@@ -17,6 +19,8 @@ export default function App() {
           <Route path="/equipos/nuevo" element={<AltaEquipo />} />
           <Route path="/equipos/:id" element={<FichaEquipo />} />
           <Route path="/ordenes/:id" element={<DetalleOrden />} />
+          <Route path="/catalogo" element={<Catalogo />} />
+          <Route path="/ajustes" element={<Ajustes />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

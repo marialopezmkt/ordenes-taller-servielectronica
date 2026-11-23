@@ -1,7 +1,15 @@
 import { describe, it, expect } from "vitest";
 import { act, render, screen } from "@testing-library/react";
 import { crearEquipo } from "@/dominio/acciones";
-import { garantiaVigente, ordenAbierta, retiroAtrasado } from "@/dominio/reglas";
+import { ESTADOS, datosVacios } from "@/dominio/modelo";
+import {
+  desglose,
+  entregaSinReparacion,
+  esFinal,
+  garantiaVigente,
+  ordenAbierta,
+  retiroAtrasado,
+} from "@/dominio/reglas";
 import { CLAVE_DATOS, cargarDatos, type Almacen } from "@/datos/almacen";
 import { DatosProvider, useDatos } from "@/datos/contexto";
 import { crearSemilla } from "@/datos/semilla";
@@ -35,23 +43,51 @@ describe("semilla", () => {
   const d = crearSemilla(HOY);
   const orden = (equipoId: string) => d.ordenes.find((o) => o.equipoId === equipoId)!;
 
-  it("trae 10 equipos y 10 órdenes con códigos correlativos", () => {
-    expect(d.equipos).toHaveLength(10);
-    expect(d.ordenes).toHaveLength(10);
-    expect(new Set(d.ordenes.map((o) => o.id)).size).toBe(10);
+  it("trae 14 equipos de los cuatro tipos y 18 órdenes con códigos correlativos", () => {
+    expect(d.equipos).toHaveLength(14);
+    expect(new Set(d.equipos.map((e) => e.tipo))).toEqual(new Set(["notebook", "pc", "celular", "tablet"]));
+    expect(d.ordenes).toHaveLength(18);
+    expect(new Set(d.ordenes.map((o) => o.id)).size).toBe(18);
+  });
+
+  it("tiene órdenes en los ocho estados", () => {
+    const cuenta = Object.fromEntries(ESTADOS.map((e) => [e.id, d.ordenes.filter((o) => o.estado === e.id).length]));
+    expect(cuenta).toEqual({
+      ingresado: 2,
+      en_diagnostico: 2,
+      esperando_aprobacion: 2,
+      en_reparacion: 2,
+      esperando_repuesto: 2,
+      lista_para_retirar: 3,
+      entregado: 3,
+      sin_reparacion: 2,
+    });
+  });
+
+  it("ningún equipo tiene más de una orden abierta y todas guardan su total", () => {
+    for (const e of d.equipos) {
+      expect(d.ordenes.filter((o) => o.equipoId === e.id && !esFinal(o.estado)).length).toBeLessThanOrEqual(1);
+    }
+    for (const o of d.ordenes) expect(o.total).toBe(desglose(o).total);
   });
 
   it("cubre los casos de los criterios", () => {
-    expect(orden("EQ-0002").estado).toBe("esperando_aprobacion");
-    expect(retiroAtrasado(orden("EQ-0003"), HOY)).toBe(true);
+    const abierta = (id: string) => ordenAbierta(d.ordenes, id)!;
+    expect(abierta("EQ-0002").estado).toBe("esperando_aprobacion");
+    expect(retiroAtrasado(abierta("EQ-0003"), HOY)).toBe(true);
     expect(garantiaVigente(d.ordenes, "EQ-0004", HOY)).toBeDefined();
     expect(garantiaVigente(d.ordenes, "EQ-0007", HOY)).toBeUndefined();
-    expect(ordenAbierta(d.ordenes, "EQ-0005")).toBeDefined();
+    expect(abierta("EQ-0005")).toBeDefined();
     expect(orden("EQ-0010").estado).toBe("sin_reparacion");
+    // Rechazó y retiró: esa entrega no da garantía.
+    expect(entregaSinReparacion(d.ordenes, "EQ-0012", HOY)).toBeDefined();
+    // Solo la HP lleva más de 30 días lista para retirar.
+    expect(d.ordenes.filter((o) => retiroAtrasado(o, HOY))).toHaveLength(1);
   });
 
   it("se puede armar cualquier día del año (fechas relativas)", () => {
     expect(() => crearSemilla("2027-01-03")).not.toThrow();
+    expect(() => crearSemilla("2026-03-01")).not.toThrow();
   });
 });
 
@@ -59,12 +95,18 @@ describe("cargarDatos", () => {
   it("sin la clave propia carga la semilla y la guarda", () => {
     const { almacen, mapa } = almacenFalso();
     const r = cargarDatos(almacen, HOY);
-    expect(r.ok && r.valor.datos.equipos).toHaveLength(10);
+    expect(r.ok && r.valor.datos.equipos).toHaveLength(14);
     expect(mapa.has(CLAVE_DATOS)).toBe(true);
   });
 
+  it("los datos de la versión anterior (otra clave) no impiden cargar la semilla nueva", () => {
+    const { almacen } = almacenFalso({ "servielectronica-ot:datos": JSON.stringify({ version: 1 }) });
+    const r = cargarDatos(almacen, HOY);
+    expect(r.ok && r.valor.datos.ordenes).toHaveLength(18);
+  });
+
   it("con la clave propia no vuelve a cargar la semilla", () => {
-    const guardado = { version: 1, equipos: [], ordenes: [], correlativos: { equipo: 0, ordenesPorAnio: {} } };
+    const guardado = datosVacios();
     const { almacen } = almacenFalso({ [CLAVE_DATOS]: JSON.stringify(guardado) });
     const r = cargarDatos(almacen, HOY);
     expect(r.ok && r.valor.datos.equipos).toHaveLength(0);
@@ -100,8 +142,8 @@ describe("guardar antes de mostrar éxito", () => {
       ok = ctx().ejecutar((d, hoy) => crearEquipo(d, nuevo, hoy)).ok;
     });
     expect(ok).toBe(true);
-    expect(screen.getByText("equipos: 11")).toBeInTheDocument();
-    expect(JSON.parse(mapa.get(CLAVE_DATOS)!).equipos).toHaveLength(11);
+    expect(screen.getByText("equipos: 15")).toBeInTheDocument();
+    expect(JSON.parse(mapa.get(CLAVE_DATOS)!).equipos).toHaveLength(15);
   });
 
   it("si el guardado falla, no cambia nada y devuelve el error", () => {
@@ -114,8 +156,8 @@ describe("guardar antes de mostrar éxito", () => {
       r = ctx().ejecutar((d, hoy) => crearEquipo(d, nuevo, hoy));
     });
     expect(r.ok).toBe(false);
-    expect(screen.getByText("equipos: 10")).toBeInTheDocument();
-    expect(ctx().datos.correlativos.equipo).toBe(10);
+    expect(screen.getByText("equipos: 14")).toBeInTheDocument();
+    expect(ctx().datos.correlativos.equipo).toBe(14);
     expect(mapa.get(CLAVE_DATOS)).toBe(antes);
   });
 

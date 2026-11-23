@@ -2,7 +2,6 @@
 // originales. Si una validación falla devuelven { ok: false } y nada cambia
 // (ni estados, ni totales, ni correlativos).
 import {
-  CATALOGO,
   ID_DIAGNOSTICO,
   TRANSICIONES,
   nombreEstado,
@@ -89,6 +88,8 @@ export function abrirOrden(
   const anio = hoy.slice(0, 4);
   const numero = (datos.correlativos.ordenesPorAnio[anio] ?? 0) + 1;
   const enGarantia = garantiaVigente(datos.ordenes, equipoId, hoy) !== undefined;
+  const diagnostico = datos.catalogo.find((s) => s.id === ID_DIAGNOSTICO);
+  if (!diagnostico) return { ok: false, error: "Falta el Diagnóstico general en el catálogo." };
   const orden: Orden = conTotal({
     id: codigoOrden(anio, numero),
     equipoId,
@@ -96,6 +97,8 @@ export function abrirOrden(
     diagnostico: "",
     servicios: [],
     repuestos: [],
+    // El precio del diagnóstico queda congelado al abrir la orden.
+    precioDiagnostico: diagnostico.precio,
     total: 0,
     enGarantia,
     presupuesto: "pendiente",
@@ -143,8 +146,16 @@ export function cargarDiagnostico(
 
   const servicios = [];
   for (const id of carga.servicioIds) {
-    const s = CATALOGO.find((c) => c.id === id);
+    // Un servicio que la orden ya tenía conserva su precio y su nombre, aunque
+    // después se haya editado o pausado en el catálogo.
+    const previo = orden.servicios.find((s) => s.servicioId === id);
+    if (previo) {
+      servicios.push(previo);
+      continue;
+    }
+    const s = datos.catalogo.find((c) => c.id === id);
     if (!s || s.id === ID_DIAGNOSTICO) return { ok: false, error: "Servicio no válido." };
+    if (s.pausado) return { ok: false, error: `«${s.nombre}» está pausado en el catálogo.` };
     if (!s.equipos.includes(equipo.tipo)) {
       return { ok: false, error: `«${s.nombre}» no corresponde a este tipo de equipo.` };
     }

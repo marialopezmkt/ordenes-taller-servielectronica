@@ -7,7 +7,7 @@ import {
   type NuevoEquipo,
 } from "@/dominio/acciones";
 import { diasEntre, sumarDias } from "@/dominio/fechas";
-import { ESTADOS, TRANSICIONES, type DatosTaller, type IdAccion, type Resultado } from "@/dominio/modelo";
+import { ESTADOS, TRANSICIONES, datosVacios, type DatosTaller, type IdAccion, type Resultado } from "@/dominio/modelo";
 import {
   accionesDisponibles,
   desglose,
@@ -18,7 +18,7 @@ import {
 const HOY = "2026-11-20";
 
 function vacios(): DatosTaller {
-  return { version: 1, equipos: [], ordenes: [], correlativos: { equipo: 0, ordenesPorAnio: {} } };
+  return datosVacios();
 }
 
 function notebook(serie: string): NuevoEquipo {

@@ -32,6 +32,12 @@ export function Marco() {
             <NavLink to="/equipos/nuevo" className={nav}>
               Nuevo equipo
             </NavLink>
+            <NavLink to="/catalogo" className={nav}>
+              Catálogo
+            </NavLink>
+            <NavLink to="/ajustes" className={nav}>
+              Ajustes
+            </NavLink>
             <button
               type="button"
               className="inline-flex min-h-11 items-center rounded-md px-3 text-blanco/80 hover:bg-blanco/10"
